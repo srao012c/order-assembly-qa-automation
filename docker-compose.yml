@@ -1,0 +1,105 @@
+version: '3.8'
+
+services:
+  # WireMock for Card Catalog Service
+  wiremock:
+    image: wiremock/wiremock:latest
+    container_name: wiremock-card-catalog
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./docker/wiremock/stubs:/home/wiremock 
+
+    command: --port=8080 --global-response-templating --root-dir=/home/wiremock
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/__admin/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # LocalStack for SQS and other AWS services
+  localstack:
+    image: localstack/localstack:latest
+    container_name: localstack-aws
+    ports:
+      - "4566:4566"
+      - "4571:4571"
+    environment:
+      - SERVICES=sqs
+      - DEBUG=1
+      - DATA_DIR=/tmp/localstack/data
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:4566/_localstack/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # SQS Queue Initialization Service
+  sqs-init:
+    image: amazon/aws-cli:latest
+    container_name: sqs-queue-init
+    entrypoint: /bin/bash
+    command:
+      - -c
+      - |
+        echo "Waiting for LocalStack to be ready..."
+        sleep 5
+        echo "Creating SQS queue..."
+        aws --endpoint-url=http://localstack:4566 sqs create-queue \
+          --queue-name assembled-orders \
+          --region us-east-1
+        if [ $? -eq 0 ]; then
+          echo "✅ SQS queue 'assembled-orders' created successfully!"
+        else
+          echo "⚠️  Queue may already exist or creation failed"
+        fi
+    environment:
+      - AWS_DEFAULT_REGION=us-east-1
+      - AWS_ACCESS_KEY_ID=test
+      - AWS_SECRET_ACCESS_KEY=test
+    depends_on:
+      localstack:
+        condition: service_healthy
+    networks:
+      - test-network
+
+  # Order Assembly Service
+  order-assembly-service:
+    build:
+      context: ./services/order-assembly-service
+      dockerfile: Dockerfile
+    container_name: order-assembly-service
+    ports:
+      - "3000:3000"
+    environment:
+      - PORT=3000
+      - NODE_ENV=development
+      - CARD_CATALOG_URL=http://wiremock:8080
+      - SQS_ENDPOINT=http://localstack:4566
+      - QUEUE_URL=http://localstack:4566/000000000000/assembled-orders
+    depends_on:
+      wiremock:
+        condition: service_healthy
+      localstack:
+        condition: service_healthy
+      sqs-init:
+        condition: service_completed_successfully
+    networks:
+      - test-network
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+networks:
+  test-network:
+    driver: bridge

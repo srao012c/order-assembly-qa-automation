@@ -1,0 +1,6 @@
+{
+  "status": "healthy",
+  "service": "order-assembly-service",
+  "timestamp": "2025-01-31T10:00:00Z",
+  "version": "1.0.0"
+}

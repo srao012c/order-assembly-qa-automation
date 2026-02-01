@@ -1,0 +1,12 @@
+node_modules/
+cypress/videos/
+cypress/screenshots/
+cypress/reports/
+.env
+.env.local
+.DS_Store
+dist/
+build/
+*.log
+.vscode/settings.json
+.idea/

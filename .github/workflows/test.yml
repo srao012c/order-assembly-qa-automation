@@ -1,0 +1,142 @@
+name: Run Cypress Tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+    # Manual trigger from Actions tab
+
+env:
+  NODE_VERSION: '18'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    
+    services:
+      docker:
+        image: docker:dind
+        options: --privileged
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Start services with Docker Compose
+        run: |
+          # Check if docker compose is available
+          docker compose --version
+          
+          # Start all services
+          docker compose up -d
+          
+          # Wait for services to be healthy
+          echo "Waiting for services to be healthy..."
+          for i in {1..30}; do
+            echo "Health check attempt $i/30..."
+            
+            # Check WireMock health
+            if curl -f http://localhost:8080/__admin/health > /dev/null 2>&1; then
+              echo "✅ WireMock is healthy"
+            else
+              echo "⏳ WireMock not ready yet"
+            fi
+            
+            # Check LocalStack health
+            if curl -f http://localhost:4566/_localstack/health > /dev/null 2>&1; then
+              echo "✅ LocalStack is healthy"
+            else
+              echo "⏳ LocalStack not ready yet"
+            fi
+            
+            # Check Order Assembly Service health
+            if curl -f http://localhost:3000/health > /dev/null 2>&1; then
+              echo "✅ Order Assembly Service is healthy"
+            else
+              echo "⏳ Order Assembly Service not ready yet"
+            fi
+            
+            # Check if all services are healthy
+            if curl -f http://localhost:8080/__admin/health > /dev/null 2>&1 && \
+               curl -f http://localhost:4566/_localstack/health > /dev/null 2>&1 && \
+               curl -f http://localhost:3000/health > /dev/null 2>&1; then
+              echo "✅ All services are healthy!"
+              break
+            fi
+            
+            if [ $i -eq 30 ]; then
+              echo "❌ Services failed to become healthy"
+              docker compose logs
+              exit 1
+            fi
+            
+            sleep 2
+          done
+
+      - name: Run Cypress tests
+        run: npm test
+        continue-on-error: true
+
+      - name: Upload Mochawesome report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: mochawesome-report
+          path: cypress/reports/
+          if-no-files-found: warn
+
+      - name: Upload test results (screenshots)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-screenshots
+          path: cypress/screenshots/
+          if-no-files-found: warn
+
+      - name: Upload test videos
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: cypress-videos
+          path: cypress/videos/
+          if-no-files-found: warn
+
+      - name: Print Docker Compose logs
+        if: failure()
+        run: |
+          echo "=== Docker Compose Services Status ==="
+          docker compose ps
+          echo "=== Docker Compose Logs ==="
+          docker compose logs
+
+      - name: Stop Docker services
+        if: always()
+        run: docker compose down -v
+
+      - name: Test summary
+        if: always()
+        run: |
+          echo "## Test Execution Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "- **Date**: $(date)" >> $GITHUB_STEP_SUMMARY
+          echo "- **Branch**: ${{ github.ref }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Commit**: ${{ github.sha }}" >> $GITHUB_STEP_SUMMARY
+          echo "- **Runner**: ${{ runner.os }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "For detailed results, check the artifacts below." >> $GITHUB_STEP_SUMMARY

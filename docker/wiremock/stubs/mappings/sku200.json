@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/catalog/sku/SKU200"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "sku": "SKU200",
+      "name": "Standard Gadget",
+      "category": "Accessories",
+      "price": 49.99,
+      "stock": 300,
+      "supplier_id": "SUPP002",
+      "metadata": {
+        "weight": "250g",
+        "dimensions": "8x8x3 cm",
+        "color": "White"
+      }
+    }
+  }
+}

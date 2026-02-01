@@ -1,0 +1,25 @@
+{
+  "request": {
+    "method": "GET",
+    "urlPattern": "/catalog/sku/SKU100"
+  },
+  "response": {
+    "status": 200,
+    "headers": {
+      "Content-Type": "application/json"
+    },
+    "jsonBody": {
+      "sku": "SKU100",
+      "name": "Premium Widget",
+      "category": "Electronics",
+      "price": 99.99,
+      "stock": 150,
+      "supplier_id": "SUPP001",
+      "metadata": {
+        "weight": "500g",
+        "dimensions": "10x10x5 cm",
+        "color": "Black"
+      }
+    }
+  }
+}

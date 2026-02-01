@@ -1,0 +1,208 @@
+{
+  "validOrder": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      },
+      {
+        "sku": "SKU200",
+        "quantity": 1
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "validOrderAlt": {
+    "order_id": "O12346",
+    "customer_id": "C901",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 5
+      }
+    ],
+    "order_ts": "2025-01-31T11:00:00Z"
+  },
+  "duplicateOrder": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      },
+      {
+        "sku": "SKU200",
+        "quantity": 1
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "missingOrderId": {
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "missingCustomerId": {
+    "order_id": "O12345",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "missingItems": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "emptyItems": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "zeroQuantity": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 0
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "negativeQuantity": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": -5
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "missingSku": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [
+      {
+        "quantity": 2
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "invalidTimestamp": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ],
+    "order_ts": "not-a-date"
+  },
+  "missingTimestamp": {
+    "order_id": "O12345",
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ]
+  },
+  "invalidSkuOrder": {
+    "order_id": "O12347",
+    "customer_id": "C902",
+    "items": [
+      {
+        "sku": "INVALID_SKU",
+        "quantity": 1
+      }
+    ],
+    "order_ts": "2025-01-31T12:00:00Z"
+  },
+  "emptyOrderId": {
+    "order_id": "",
+    "customer_id": "C900",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "emptyCustomerId": {
+    "order_id": "O12345",
+    "customer_id": "",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "largeQuantity": {
+    "order_id": "O12348",
+    "customer_id": "C903",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 99999
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "multipleItemsWithInvalidSku": {
+    "order_id": "O12349",
+    "customer_id": "C904",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 1
+      },
+      {
+        "sku": "INVALID_SKU",
+        "quantity": 1
+      }
+    ],
+    "order_ts": "2025-01-31T10:12:33Z"
+  },
+  "futureTimestamp": {
+    "order_id": "O12350",
+    "customer_id": "C905",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ],
+    "order_ts": "2099-12-31T23:59:59Z"
+  },
+  "pastTimestamp": {
+    "order_id": "O12351",
+    "customer_id": "C906",
+    "items": [
+      {
+        "sku": "SKU100",
+        "quantity": 2
+      }
+    ],
+    "order_ts": "2000-01-01T00:00:00Z"
+  }
+}
